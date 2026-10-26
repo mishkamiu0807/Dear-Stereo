@@ -57,7 +57,7 @@ async function login(){const v=b64(crypto.getRandomValues(new Uint8Array(48)));l
 async function tok(b){const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:CID,...b})}),j=await r.json();if(!j.access_token)throw j;T={a:j.access_token,r:j.refresh_token||(T&&T.r),e:Date.now()+j.expires_in*1000-6e4};localStorage.dsT=JSON.stringify(T)}
 async function token(){if(Date.now()>T.e)await tok({grant_type:"refresh_token",refresh_token:T.r});return T.a}
 async function api(p,o={}){const r=await fetch("https://api.spotify.com/v1"+p,{...o,headers:{Authorization:"Bearer "+await token(),"Content-Type":"application/json"}});if(r.status==204||r.status==202)return{};const j=await r.json().catch(()=>({}));if(!r.ok)throw j.error||{message:"HTTP "+r.status};return j}
-(async()=>{const q=new URLSearchParams(location.search);if(q.get("code")){try{await tok({grant_type:"authorization_code",code:q.get("code"),redirect_uri:RED,code_verifier:localStorage.dsV})}catch(e){alert("Login failed: "+JSON.stringify(e))}history.replaceState({},"",RED)}
+addEventListener("DOMContentLoaded",async()=>{const q=new URLSearchParams(location.search);if(q.get("code")){try{await tok({grant_type:"authorization_code",code:q.get("code"),redirect_uri:RED,code_verifier:localStorage.dsV})}catch(e){alert("Login failed: "+JSON.stringify(e))}history.replaceState({},"",RED)}
  if(!T)return $("login").style.display="block";$("app").style.display="block";home();loadArtists()})();
 async function loadArtists(){await Promise.all(ARTISTS.map(async a=>{try{a.img=(await api("/artists/"+a.id)).images[0].url}catch(e){a.err=e.message}}));go(view)}
 // ===== Player =====
