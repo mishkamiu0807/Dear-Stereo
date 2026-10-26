@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dear Stereo</title>
+<style>
+:root{--bg:#fff4ef;--card:#fff;--ink:#4a2c3b;--pink:#ff8fa3;--coral:#ff7a6b;--peach:#ffc9a9;--mint:#9ee0c9;--lav:#cdb4f6}
+@media(prefers-color-scheme:dark){:root{--bg:#2a1a26;--card:#3a2434;--ink:#ffe9e2}}
+*{box-sizing:border-box}body{margin:0;font-family:Georgia,'Trebuchet MS',serif;background:var(--bg);color:var(--ink);padding-bottom:40px}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:linear-gradient(90deg,var(--pink),var(--peach));color:#4a2c3b;position:sticky;top:0;z-index:5;flex-wrap:wrap;gap:6px}
+header h1{margin:0;font-size:20px}.btn,nav button{border:0;border-radius:20px;padding:8px 14px;background:var(--coral);color:#fff;cursor:pointer;font:inherit;margin:2px}
+.alt{background:var(--lav)!important;color:#3a2434!important}
+main{max-width:980px;margin:auto;padding:16px}section{display:none}section.on{display:block}
+.card{background:var(--card);border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 6px 18px #ff7a6b22}
+.hero{background:linear-gradient(135deg,var(--pink),var(--lav));color:#3a2434}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.art{text-align:center;cursor:pointer;font-size:14px}.av{width:100px;height:100px;border-radius:50%;margin:auto;display:flex;align-items:center;justify-content:center;font-size:34px;background-size:cover;background-position:center;border:4px solid var(--peach);transition:.2s}
+.sq{border-radius:14px}.art:hover .av{transform:rotate(10deg) scale(1.06)}
+.vw{display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:center}
+.vinyl{width:220px;height:220px;border-radius:50%;background:repeating-radial-gradient(circle,#1b1b1b 0 3px,#2a2a2a 3px 6px);position:relative;box-shadow:0 10px 30px #0006;animation:spin 6s linear infinite;animation-play-state:paused}
+.vinyl.play{animation-play-state:running}@keyframes spin{to{transform:rotate(360deg)}}
+.label{position:absolute;inset:31%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--pink) center/cover}
+.stk{position:absolute;font-size:26px;animation:fl 3s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-6px)}}
+input,select{font:inherit;padding:8px;border-radius:12px;border:2px solid var(--peach);background:var(--card);color:var(--ink);max-width:100%}
+.tag{display:inline-block;background:var(--mint);color:#23463a;border-radius:12px;padding:2px 10px;margin:2px;font-size:13px}
+.bar{height:10px;background:var(--peach);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--coral)}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:9}.modal.on{display:flex}
+.modal div{background:var(--card);padding:24px;border-radius:24px;max-width:340px;text-align:center}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.small{font-size:13px;opacity:.8}
+.chk label{display:inline-block;margin:3px 8px 3px 0}#login{text-align:center;padding:50px 16px}
+</style></head><body>
+<div id="login" style="display:none"><div style="font-size:70px">💿🌸</div><h1>Dear Stereo</h1><p>Your vinyl study space. Connect Spotify (Premium) to start spinning.</p><button class="btn" onclick="login()">Connect Spotify</button></div>
+<div id="app" style="display:none">
+<header><h1>💿 Dear Stereo</h1><nav><button onclick="go('home')">Home</button><button onclick="go('lib')">Artists</button><button onclick="go('sess')">Session</button><button onclick="go('decks')">Decks</button><button onclick="go('quests')">Quests</button><button class="alt" onclick="go('prof')">Profile</button></nav></header>
+<main>
+<section id="home" class="on"></section><section id="lib"></section><section id="artist"></section><section id="sess"></section><section id="decks"></section><section id="quests"></section><section id="prof"></section>
+<div class="card" id="player" style="display:none"><div class="vw"><div style="position:relative" id="vwrap"><div class="vinyl" id="vinyl"><div class="label" id="label"></div></div></div>
+<div style="flex:1;min-width:240px"><h3 id="nowT" style="margin:0">Pick a vinyl</h3><div class="small" id="nowS"></div><br>
+<button class="btn" onclick="P&&P.togglePlay()">⏯</button><button class="btn alt" onclick="P&&P.previousTrack()">⏮</button><button class="btn alt" onclick="P&&P.nextTrack()">⏭</button><button class="btn" onclick="favNow()">💖 Save</button><br><br><div id="sessInfo" class="small"></div></div></div></div>
+</main></div>
+<div class="modal" id="modal"><div><div style="font-size:50px" id="mEmo"></div><h3 id="mT"></h3><p id="mP"></p><button class="btn" onclick="$('modal').classList.remove('on')">OK 💗</button></div></div>
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<script>
+const CID="d52277b498ef4cbd9a31ba34f66f4573",RED="https://mishkamiu0807.github.io/Dear-Stereo/",SC="streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state playlist-read-private";
+const ARTISTS=[["Sombr","4G9NDjRyZFDlJKMRL8hx3S","🖤"],["Lorde","163tK9Wjr9P9DmM0AVK7lm","🌿"],["Taylor Swift","06HL4z0CvFAxyc27GXpf02","🧣"],["Olivia Rodrigo","1McMsnEElThX1knmY4oliG","💜"],["Olivia Dean","00x1fYSGhdqScXBRpSj3DW","🌼"],["Gracie Abrams","4tuJ0bMpJh08umKkEXKUI5","🕊️"],["The Weeknd","1Xyo4u8uXC1ZmMpatF05PJ","🌙"],["Drake","3TVXtAsR1Inumwj472S9r4","🦉"],["Central Cee","5H4yInM5zmHqpKIoMNAx4r","🚀"],["Tate McRae","45dkTj5sMRSjrmBSBeiHym","💃"],["Lana Del Rey","00FQb4jTyendYWaN8pK0wa","🌹"],["Justin Bieber","1uNFoZAHBGtllmzznpCI3s","🧸"],["Kendrick Lamar","2YZyLoL8N0Wb9xBt1NhZWg","👑"],["Bad Bunny","4q3ewBCX7sLwd24euuV69X","🐰"],["Isabel LaRose","5arKwJZEvT5uKq4o0JfqR4","🍒"],["Billie Eilish","6qqNVTkY8uBg9cP3Jd7DAH","🕷️"],["Jaehyun","0qQI2kmsvSe2ex9k94T5vu","🍀"]].map(a=>({n:a[0],id:a[1],e:a[2]}));
+const SETS=[["🌸","🐚","🪸","🐠"],["🌺","⭐","🦀","🫧"],["🌷","🍓","🐙","✨"],["🪷","🌊","🐬","💫"]];
+const COVERS=["linear-gradient(135deg,#ff8fa3,#ffc9a9)","linear-gradient(135deg,#9ee0c9,#cdb4f6)","linear-gradient(135deg,#ff7a6b,#ffd6e0)","linear-gradient(135deg,#a0c4ff,#fdffb6)","linear-gradient(135deg,#f9c6e0,#b8f2e6)"];
+const MSG=["im tired... need a break? 🥺 stretch, sip water, I'll be here","you've been so focused!! rest your eyes for 10 min 🌸","pause time 🐚 hydrate, then come back stronger","we both deserve a break 💗 come back soon"];
+const QUESTS=[["p1","Spin your first vinyl",1,"plays",50],["p5","Spin 5 vinyls",5,"plays",100],["s1","Finish a focus session",1,"sessions",150],["f3","Save 3 vinyls",3,"favs",100],["t3","Tag 3 albums with a subject",3,"tags",100],["a5","Try 5 different artists",5,"artists",150]];
+const UNLOCK=[[100,"Deck: Late Night Study 🌙"],[250,"Mix: Golden Hour Focus ☀️"],[450,"Deck: Coral Reef Calm 🪸"],[700,"Mix: Exam Week Warriors 🏆"]];
+const $=i=>document.getElementById(i),R=[],reg=o=>R.push(o)-1,albums={};
+let T=JSON.parse(localStorage.dsT||"null"),S=JSON.parse(localStorage.dsS||"null")||{name:"Listener",xp:0,plays:0,sessions:0,hist:[],decks:{"My Favourites":[]},tags:{},cover:0,claimed:{}};
+let P=null,dev=null,cur=null,setIdx=0,sess=null,timer=null,view="home";
+const save=()=>localStorage.dsS=JSON.stringify(S),find=n=>ARTISTS.find(a=>a.n===n);
+// ===== Spotify auth (PKCE, no secret needed) =====
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+async function login(){const v=b64(crypto.getRandomValues(new Uint8Array(48)));localStorage.dsV=v;const c=b64(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(v)));location.href="https://accounts.spotify.com/authorize?"+new URLSearchParams({response_type:"code",client_id:CID,scope:SC,redirect_uri:RED,code_challenge_method:"S256",code_challenge:c})}
+async function tok(b){const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:CID,...b})}),j=await r.json();if(!j.access_token)throw j;T={a:j.access_token,r:j.refresh_token||(T&&T.r),e:Date.now()+j.expires_in*1000-6e4};localStorage.dsT=JSON.stringify(T)}
+async function token(){if(Date.now()>T.e)await tok({grant_type:"refresh_token",refresh_token:T.r});return T.a}
+async function api(p,o={}){const r=await fetch("https://api.spotify.com/v1"+p,{...o,headers:{Authorization:"Bearer "+await token(),"Content-Type":"application/json"}});if(r.status==204||r.status==202)return{};const j=await r.json().catch(()=>({}));if(!r.ok)throw j.error||{message:"HTTP "+r.status};return j}
+(async()=>{const q=new URLSearchParams(location.search);if(q.get("code")){try{await tok({grant_type:"authorization_code",code:q.get("code"),redirect_uri:RED,code_verifier:localStorage.dsV})}catch(e){alert("Login failed: "+JSON.stringify(e))}history.replaceState({},"",RED)}
+ if(!T)return $("login").style.display="block";$("app").style.display="block";home();loadArtists()})();
+async function loadArtists(){await Promise.all(ARTISTS.map(async a=>{try{a.img=(await api("/artists/"+a.id)).images[0].url}catch(e){a.err=e.message}}));go(view)}
+// ===== Player =====
+window.onSpotifyWebPlaybackSDKReady=()=>{const st=setInterval(()=>{if(!T)return;clearInterval(st);P=new Spotify.Player({name:"Dear Stereo",getOAuthToken:async cb=>cb(await token()),volume:.6});
+ P.addListener("ready",e=>dev=e.device_id);P.addListener("authentication_error",e=>alert("Spotify login problem: "+e.message));P.addListener("account_error",()=>alert("Spotify Premium is needed for in-app playback."));
+ P.addListener("player_state_changed",s=>{if(!s)return;const t=s.track_window.current_track;$("vinyl").classList.toggle("play",!s.paused);$("nowT").textContent=t.name;$("nowS").textContent=t.artists.map(x=>x.name).join(", ")+" · "+t.album.name;
+  const im=t.album.images[0];$("label").style.backgroundImage=im?`url('${im.url}')`:"";$("label").textContent=im?"":"💿"});P.connect()},300)};
+async function playCtx(o){if(!dev)return alert("Player is still starting. Try again in a few seconds.");P.activateElement();cur=o;setIdx=(setIdx+1)%4;
+ try{await api("/me/player/shuffle?state="+(o.shuffle?"true":"false")+"&device_id="+dev,{method:"PUT"});await api("/me/player/play?device_id="+dev,{method:"PUT",body:JSON.stringify(o.uris?{uris:o.uris}:{context_uri:o.uri})})}catch(e){return alert("Could not play: "+(e.message||JSON.stringify(e)))}
+ S.plays++;S.xp+=10;if(o.a){S.hist.push({a:o.a,b:bucket()});S.hist=S.hist.slice(-200)}save();$("player").style.display="block";$("nowT").textContent=o.title;$("nowS").textContent=o.sub||"";
+ document.querySelectorAll(".stk").forEach(e=>e.remove());SETS[setIdx].forEach((s,i)=>{const e=document.createElement("span");e.className="stk";e.textContent=s;e.style.cssText=`top:${[0,72,72,0][i]}%;left:${[4,0,86,84][i]}%`;$("vwrap").appendChild(e)});
+ if(!o.uris&&!o.img)$("label").style.background=COVERS[(S.cover+setIdx)%5];progress();$("player").scrollIntoView({behavior:"smooth"})}
+const playR=i=>playCtx(R[i]);
+function favNow(){if(!cur||cur.uris)return alert("Play an album or artist to save it (mixes can't be saved).");const d=Object.keys(S.decks),n=prompt("Save to which deck?\n"+d.join(", ")+"\n(type a new name to create one)",d[0]);if(!n)return;(S.decks[n]=S.decks[n]||[]).push({...cur,shuffle:false});save();progress();alert("Saved to "+n+" 💖")}
+// ===== Data helpers =====
+const bucket=()=>{const h=new Date().getHours();return h<5?"night":h<12?"morning":h<17?"afternoon":h<21?"evening":"night"};
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+async function getAlbums(a){if(albums[a.id])return albums[a.id];const j=await api(`/artists/${a.id}/albums?include_groups=album,single&limit=50&market=from_token`),seen={};return albums[a.id]=j.items.filter(x=>!seen[x.name.toLowerCase()]&&(seen[x.name.toLowerCase()]=1))}
+async function buildUris(names,max=100){let pool=[];for(const n of names){try{const al=await getAlbums(find(n));pool.push(...sh(al).slice(0,Math.ceil(10/names.length)+2).map(x=>x.id))}catch(e){}}
+ let u=[];for(const id of sh(pool).slice(0,12)){try{u.push(...(await api(`/albums/${id}/tracks?limit=50`)).items.map(t=>t.uri))}catch(e){}}return sh(u).slice(0,max)}
+const av=a=>`<div class="av" style="${a.img?`background-image:url('${a.img}')`:`background:${COVERS[ARTISTS.indexOf(a)%5]}`}">${a.img?"":a.e}</div>`;
+const artCard=a=>`<div class="art" onclick="openArtist('${a.n}')">${av(a)}<div>${a.n}</div></div>`;
+function go(id){view=id;document.querySelectorAll("section").forEach(s=>s.classList.remove("on"));$(id).classList.add("on");({home,lib,sess:sessV,decks:decksV,quests:questV,prof:profV})[id]?.()}
+// ===== Views =====
+function home(){const b=bucket(),g={morning:"Good morning ☀️",afternoon:"Good afternoon 🌼",evening:"Good evening 🌆",night:"Late night vibes 🌙"}[b],m={};S.hist.filter(h=>h.b===b).forEach(h=>m[h.a]=(m[h.a]||0)+1);const top=Object.keys(m).sort((x,y)=>m[y]-m[x]),err=ARTISTS.find(a=>a.err);
+ $("home").innerHTML=`<div class="card hero"><h2>${g}, ${S.name}!</h2>${top[0]?`<p>It's ${b} time. Time to jump back to <b>${top[0]}</b> 💿 (your usual for this part of the day)</p>`:`<p>Pick a vinyl and let it spin. I'll learn what you love at each time of day 🌸</p>`}
+ <button class="btn" onclick="mixNow()">✨ Mix for ${b}</button></div>
+ ${err?`<div class="card small">⚠️ Spotify said: ${err.err}. If artists don't load, add your Spotify email under User Management in your Spotify developer app.</div>`:""}
+ <div class="card"><h3>Level ${Math.floor(S.xp/100)+1}</h3><div class="bar"><i style="width:${S.xp%100}%"></i></div><p class="small">${S.xp} points</p></div>
+ <div class="card"><h3>Your artists</h3><div class="grid">${ARTISTS.map(artCard).join("")}</div></div>`}
+async function mixNow(){const b=bucket(),m={};S.hist.filter(h=>h.b===b).forEach(h=>m[h.a]=(m[h.a]||0)+1);let n=Object.keys(m).sort((x,y)=>m[y]-m[x]).slice(0,3);if(!n.length)n=sh(ARTISTS).slice(0,3).map(a=>a.n);
+ const uris=await buildUris(n);if(uris.length)playCtx({uris,title:"Your "+b+" mix",sub:n.join(" · "),a:n[0]})}
+function lib(){$("lib").innerHTML=`<div class="card"><h2>Pick an artist</h2><div class="grid">${ARTISTS.map(artCard).join("")}</div></div>`}
+async function openArtist(n){const a=find(n);view="artist";document.querySelectorAll("section").forEach(s=>s.classList.remove("on"));$("artist").classList.add("on");
+ $("artist").innerHTML=`<div class="card"><div class="row"><div style="display:flex;gap:14px;align-items:center">${av(a)}<h2>${n}</h2></div><button class="btn" onclick="playR(${reg({uri:"spotify:artist:"+a.id,title:n,sub:"Top tracks",a:n,img:a.img,shuffle:true})})">▶ Play artist</button></div></div><div class="card" id="alb">Loading albums… 💿</div><div class="card" id="pls"></div>`;
+ try{const al=await getAlbums(a);$("alb").innerHTML=`<h3>Albums &amp; singles</h3><div class="grid">${al.map(x=>{const o={uri:x.uri,title:x.name,sub:n,a:n,img:(x.images[0]||{}).url,id:x.id};const tg=S.tags[x.id];return `<div class="art"><div class="av sq" onclick="playR(${reg(o)})" style="background-image:url('${o.img}')"></div><div>${x.name}</div>${tg?`<span class="tag">${tg}</span>`:""}<div><button class="btn alt" style="padding:3px 10px" onclick="tagIt('${x.id}','${n}')">🏷</button></div></div>`}).join("")}</div>`}catch(e){$("alb").textContent="Couldn't load albums: "+(e.message||"error")}
+ try{const j=await api("/search?type=playlist&limit=6&q="+encodeURIComponent(n));const pl=j.playlists.items.filter(Boolean);$("pls").innerHTML=pl.length?`<h3>Playlists</h3>`+pl.map(p=>`<div class="row" style="margin:6px 0"><span>${p.name}</span><button class="btn" onclick="playR(${reg({uri:p.uri,title:p.name,sub:"Playlist",a:n,shuffle:true})})">▶</button></div>`).join(""):""}catch(e){$("pls").style.display="none"}}
+function tagIt(id,n){const t=prompt("Subject/topic for this album (e.g. Chemistry):",S.tags[id]||"");if(t){S.tags[id]=t;save();openArtist(n);progress()}}
+function sessV(){$("sess").innerHTML=`<div class="card"><h2>Focus session ⏳</h2><p>Pick artists and a time. Their music is shuffled and the singer tells you when to rest.</p><div class="chk">${ARTISTS.map(a=>`<label><input type="checkbox" value="${a.n}"> ${a.e} ${a.n}</label>`).join("")}</div><br>
+ <select id="dur"><option value="25">25 min</option><option value="60">1 hour</option><option value="120" selected>2 hours</option><option value="180">3 hours</option></select> <input id="subj" placeholder="Subject"> <button class="btn" onclick="startSess()">Start 💿</button></div>`}
+async function startSess(){const ch=[...document.querySelectorAll("#sess input:checked")].map(x=>x.value);if(!ch.length)return alert("Pick at least one artist");$("sessInfo").textContent="Building your shuffle…";
+ const uris=await buildUris(ch);if(!uris.length)return alert("No tracks found");sess={end:Date.now()+$("dur").value*6e4,subj:$("subj").value||"Focus",ch};clearInterval(timer);timer=setInterval(tick,1000);await playCtx({uris,title:sess.subj+" session",sub:ch.join(" · "),a:ch[0]})}
+function tick(){if(!sess)return;const l=sess.end-Date.now();if(l<=0){clearInterval(timer);const n=sess.ch[Math.floor(Math.random()*sess.ch.length)];sess=null;$("sessInfo").textContent="";S.sessions++;S.xp+=60;save();P&&P.pause();$("mEmo").textContent=find(n).e;$("mT").textContent=n+" says:";$("mP").textContent=MSG[Math.floor(Math.random()*4)];$("modal").classList.add("on");progress();return}
+ $("sessInfo").textContent=`⏳ ${sess.subj}: ${Math.floor(l/6e4)}m ${Math.floor(l/1e3)%60}s left`}
+function decksV(){$("decks").innerHTML=`<div class="card"><div class="row"><h2>Decks 📌</h2><button class="btn" onclick="newDeck()">+ New deck</button></div></div>`+Object.keys(S.decks).map(d=>`<div class="card"><h3>${d}</h3><div class="grid">${S.decks[d].map(v=>`<div class="art" onclick="playR(${reg(v)})"><div class="av sq" style="background:${v.img?`url('${v.img}') center/cover`:COVERS[0]}"></div>${v.title}</div>`).join("")||"<span class='small'>Empty</span>"}</div></div>`).join("")+
+ `<div class="card"><h3>Rewards 🎁</h3>${UNLOCK.map(u=>`<div>${S.xp>=u[0]?"✅":"🔒 ("+u[0]+" pts)"} ${u[1]}</div>`).join("")}</div>`}
+function newDeck(){const n=prompt("Deck name:");if(n){S.decks[n]=S.decks[n]||[];save();decksV()}}
+const stat=k=>({plays:S.plays,sessions:S.sessions,favs:Object.values(S.decks).flat().length,tags:Object.keys(S.tags).length,artists:new Set(S.hist.map(h=>h.a)).size})[k];
+function progress(){QUESTS.forEach(q=>{if(!S.claimed[q[0]]&&stat(q[3])>=q[2]){S.claimed[q[0]]=1;S.xp+=q[4];const a=ARTISTS[Math.floor(Math.random()*17)];$("mEmo").textContent=a.e;$("mT").textContent="Quest done: "+q[1];$("mP").textContent=a.n+": \"proud of you! +"+q[4]+" points 💗\"";$("modal").classList.add("on")}});save()}
+function questV(){$("quests").innerHTML=`<div class="card"><h2>Quests 🏆</h2><p>${S.xp} points</p></div>`+QUESTS.map(q=>`<div class="card"><div class="row"><b>${S.claimed[q[0]]?"✅ ":""}${q[1]}</b><span class="tag">+${q[4]}</span></div><div class="bar"><i style="width:${Math.min(100,stat(q[3])/q[2]*100)}%"></i></div></div>`).join("")}
+function profV(){$("prof").innerHTML=`<div class="card"><h2>Profile 🌷</h2>Name: <input id="pn" value="${S.name}"> <button class="btn" onclick="S.name=$('pn').value;save();alert('Saved')">Save</button><p>Vinyl label style: ${COVERS.map((c,i)=>`<button onclick="S.cover=${i};save()" style="width:34px;height:34px;border-radius:50%;border:2px solid #fff;background:${c};cursor:pointer"></button>`).join("")}</p>
+ <p class="small">Plays ${S.plays} · Sessions ${S.sessions} · Points ${S.xp}</p><button class="btn alt" onclick="localStorage.removeItem('dsT');location.reload()">Log out of Spotify</button> <button class="btn alt" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('dsS');location.reload()}">Reset progress</button></div>`}
+</script></body></html>
