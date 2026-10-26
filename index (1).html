@@ -38,7 +38,7 @@ input,select{font:inherit;padding:8px;border-radius:12px;border:2px solid var(--
 <button class="btn" onclick="P&&P.togglePlay()">⏯</button><button class="btn alt" onclick="P&&P.previousTrack()">⏮</button><button class="btn alt" onclick="P&&P.nextTrack()">⏭</button><button class="btn" onclick="favNow()">💖 Save</button><br><br><div id="sessInfo" class="small"></div></div></div></div>
 </main></div>
 <div class="modal" id="modal"><div><div style="font-size:50px" id="mEmo"></div><h3 id="mT"></h3><p id="mP"></p><button class="btn" onclick="$('modal').classList.remove('on')">OK 💗</button></div></div>
-<script src="https://sdk.scdn.co/spotify-player.js"></script>
+
 <script>
 const CID="d52277b498ef4cbd9a31ba34f66f4573",RED="https://mishkamiu0807.github.io/Dear-Stereo/",SC="streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state playlist-read-private";
 const ARTISTS=[["Sombr","4G9NDjRyZFDlJKMRL8hx3S","🖤"],["Lorde","163tK9Wjr9P9DmM0AVK7lm","🌿"],["Taylor Swift","06HL4z0CvFAxyc27GXpf02","🧣"],["Olivia Rodrigo","1McMsnEElThX1knmY4oliG","💜"],["Olivia Dean","00x1fYSGhdqScXBRpSj3DW","🌼"],["Gracie Abrams","4tuJ0bMpJh08umKkEXKUI5","🕊️"],["The Weeknd","1Xyo4u8uXC1ZmMpatF05PJ","🌙"],["Drake","3TVXtAsR1Inumwj472S9r4","🦉"],["Central Cee","5H4yInM5zmHqpKIoMNAx4r","🚀"],["Tate McRae","45dkTj5sMRSjrmBSBeiHym","💃"],["Lana Del Rey","00FQb4jTyendYWaN8pK0wa","🌹"],["Justin Bieber","1uNFoZAHBGtllmzznpCI3s","🧸"],["Kendrick Lamar","2YZyLoL8N0Wb9xBt1NhZWg","👑"],["Bad Bunny","4q3ewBCX7sLwd24euuV69X","🐰"],["Isabel LaRose","5arKwJZEvT5uKq4o0JfqR4","🍒"],["Billie Eilish","6qqNVTkY8uBg9cP3Jd7DAH","🕷️"],["Jaehyun","0qQI2kmsvSe2ex9k94T5vu","🍀"]].map(a=>({n:a[0],id:a[1],e:a[2]}));
@@ -58,7 +58,7 @@ async function tok(b){const r=await fetch("https://accounts.spotify.com/api/toke
 async function token(){if(Date.now()>T.e)await tok({grant_type:"refresh_token",refresh_token:T.r});return T.a}
 async function api(p,o={}){const r=await fetch("https://api.spotify.com/v1"+p,{...o,headers:{Authorization:"Bearer "+await token(),"Content-Type":"application/json"}});if(r.status==204||r.status==202)return{};const j=await r.json().catch(()=>({}));if(!r.ok)throw j.error||{message:"HTTP "+r.status};return j}
 addEventListener("DOMContentLoaded",async()=>{const q=new URLSearchParams(location.search);if(q.get("code")){try{await tok({grant_type:"authorization_code",code:q.get("code"),redirect_uri:RED,code_verifier:localStorage.dsV})}catch(e){alert("Login failed: "+JSON.stringify(e))}history.replaceState({},"",RED)}
- if(!T)return $("login").style.display="block";$("app").style.display="block";home();loadArtists()})();
+ if(!T)return $("login").style.display="block";$("app").style.display="block";home();loadArtists()});
 async function loadArtists(){await Promise.all(ARTISTS.map(async a=>{try{a.img=(await api("/artists/"+a.id)).images[0].url}catch(e){a.err=e.message}}));go(view)}
 // ===== Player =====
 window.onSpotifyWebPlaybackSDKReady=()=>{const st=setInterval(()=>{if(!T)return;clearInterval(st);P=new Spotify.Player({name:"Dear Stereo",getOAuthToken:async cb=>cb(await token()),volume:.6});
@@ -110,4 +110,5 @@ function progress(){QUESTS.forEach(q=>{if(!S.claimed[q[0]]&&stat(q[3])>=q[2]){S.
 function questV(){$("quests").innerHTML=`<div class="card"><h2>Quests 🏆</h2><p>${S.xp} points</p></div>`+QUESTS.map(q=>`<div class="card"><div class="row"><b>${S.claimed[q[0]]?"✅ ":""}${q[1]}</b><span class="tag">+${q[4]}</span></div><div class="bar"><i style="width:${Math.min(100,stat(q[3])/q[2]*100)}%"></i></div></div>`).join("")}
 function profV(){$("prof").innerHTML=`<div class="card"><h2>Profile 🌷</h2>Name: <input id="pn" value="${S.name}"> <button class="btn" onclick="S.name=$('pn').value;save();alert('Saved')">Save</button><p>Vinyl label style: ${COVERS.map((c,i)=>`<button onclick="S.cover=${i};save()" style="width:34px;height:34px;border-radius:50%;border:2px solid #fff;background:${c};cursor:pointer"></button>`).join("")}</p>
  <p class="small">Plays ${S.plays} · Sessions ${S.sessions} · Points ${S.xp}</p><button class="btn alt" onclick="localStorage.removeItem('dsT');location.reload()">Log out of Spotify</button> <button class="btn alt" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('dsS');location.reload()}">Reset progress</button></div>`}
-</script></body></html>
+</script>
+<script src="https://sdk.scdn.co/spotify-player.js"></script></body></html>
